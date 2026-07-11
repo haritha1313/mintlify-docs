@@ -1,0 +1,55 @@
+---
+title: "Run Scalable Agent Evals Across Models and Treatments"
+sidebarTitle: "Agent Evals"
+description: "Turn real agent workflows into repeatable evaluations across agents, models, and treatments in production-like environments at scale."
+---
+
+Agent evaluation shouldn't mean running the same workflow by hand every time something changes. With Oqoqo, you define a workflow once as an experiment, set your rubric criteria, and run it at scale across any combination of agents, models, and treatments — getting consistent, comparable results every time.
+
+## The problem
+
+One-off agent tests don't scale. If you're copy-pasting a prompt into Claude Code, checking the output manually, and repeating the process with a different model or system prompt, you're not evaluating — you're guessing. Running the same workflow manually across different agents, models, and versions is tedious, slow, and produces inconsistent results that you can't compare with confidence. Non-determinism in agent behavior means a single trial tells you almost nothing. You need repetition, structure, and a rubric before the results mean anything.
+
+## How Oqoqo solves it
+
+Define the workflow once as an Oqoqo experiment. Write a natural-language task that describes what the agent should do, add rubric criteria that define what success looks like, and choose which agents, models, and treatments to run it against. Oqoqo runs your experiment in isolated, production-like sandboxes — each trial gets a clean environment with the same repos, data, and configuration — and captures the full trajectory of every run. When all trials are complete, you compare results side by side: pass rates per rubric criterion, token usage, cost, duration, and the exact steps where each agent struggled.
+
+## What you get from agent evals
+
+Running an agent eval in Oqoqo gives you structured output you can act on:
+
+- **Pass/fail per rubric criterion per trial** — know exactly which criteria an agent met and which it missed, not just whether the run succeeded overall
+- **Full traces** — every tool call, command, file read, and error logged in sequence, so you know precisely why a trial failed
+- **Metrics per run** — steps taken, tokens consumed, cost incurred, and wall-clock duration, broken down per trial and per treatment
+- **Friction points** — the specific steps where the agent stalled, retried, hit an error, or took an unexpectedly long detour
+- **Side-by-side comparison** — compare pass rates, costs, and friction counts across agents and treatments in a single view
+
+## How to set up your first agent eval
+
+<Steps>
+  <Step title="Write a task">
+    Write a natural-language instruction that describes the workflow you want to evaluate. Be specific: include the goal, the expected output, and any constraints. For example: _"Refactor the auth module so that `require()` calls are deterministic across larger dependency graphs. Do not change the public API."_
+  </Step>
+  <Step title="Add rubric criteria">
+    Add the criteria that define a successful run. Each criterion is a statement that can be scored pass or fail. Examples: _"Returns the correct output shape"_, _"Preserves existing test coverage"_, _"Stays within a 50,000-token budget"_. Oqoqo rewrites your rubric to follow best practices for eval scoring.
+  </Step>
+  <Step title="Select agents">
+    Choose the agents you want to run the eval against. Oqoqo supports Claude Code (Sonnet, Opus) and Codex out of the box, with more agents being added. You can run multiple agents in the same experiment to compare them directly.
+  </Step>
+  <Step title="Set treatments">
+    Choose the treatments to apply. Start with **Baseline** (the agent receives only the task and the library, no extra context) and add treatments like **+ skill** or **+ MCP** to measure whether those surfaces improve outcomes.
+  </Step>
+  <Step title="Attach your library">
+    Connect the repos and data the agent needs to complete the task. Oqoqo mounts them in each sandbox so every trial starts from the same state.
+  </Step>
+  <Step title="Set trial count">
+    Set the number of trials per treatment. Three is the minimum for statistical confidence given agent non-determinism. More trials give you tighter confidence intervals on pass rate.
+  </Step>
+  <Step title="Launch and review">
+    Launch the experiment. Oqoqo runs all trials in parallel across isolated sandboxes. When runs complete, review the scorecard: pass rate by rubric criterion, metrics per trial, and the Compare view to see how treatments and agents stack up.
+  </Step>
+</Steps>
+
+<Tip>
+  Run at least 3 trials per treatment to account for non-determinism in agent behavior. A single trial can pass or fail for reasons unrelated to the treatment — you need repetition before the pass rate means anything.
+</Tip>

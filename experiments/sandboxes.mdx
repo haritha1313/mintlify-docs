@@ -1,0 +1,91 @@
+---
+title: "Sandboxes: Isolated, Reproducible Environments for Trials"
+sidebarTitle: "Sandboxes"
+description: "Oqoqo runs each trial in a clean, isolated sandbox with real repos, data, and files — so every run is reproducible and comparable."
+---
+
+A sandbox is the isolated environment where a single trial runs. Every time you launch an experiment, Oqoqo provisions a fresh sandbox for each trial — cloning your library, applying your environment configuration, and giving the agent a clean starting point. Because nothing carries over between sandboxes, every run is independent, reproducible, and directly comparable to every other run in the same experiment.
+
+## What's in a sandbox
+
+Each sandbox contains everything the agent needs to execute the task — and nothing it shouldn't have access to.
+
+- **Real repos from your library** — cloned fresh at the start of every trial, not mocked or stubbed
+- **Data fixtures** — the structured data files you attached to the experiment (e.g., `data/pricing-fixtures`)
+- **Environment configuration** — the same settings applied identically across every sandbox in the experiment
+- **The task and reasoning hook** — the instruction the agent will follow, plus the hook that captures its thinking at each step
+
+<Info>
+  Sandbox isolation means a bug or side effect in one trial never affects another.
+</Info>
+
+This isn't a simulated environment. Sandboxes run against real code, real files, and real data — a production-like setup that surfaces the kinds of failures that matter in practice.
+
+## Local vs cloud
+
+Oqoqo supports two environment options. You choose one when you define the experiment.
+
+<Tabs>
+  <Tab title="Local">
+    Trials run directly in your local environment using your machine's resources.
+
+    **Best for:**
+    - Development and iteration — fast feedback without provisioning overhead
+    - Testing workflows that depend on local services or files
+    - Keeping data on your own infrastructure
+
+    **Considerations:**
+    - Parallelism is limited by your local resources
+    - Not suitable for CI/CD pipelines without additional setup
+  </Tab>
+  <Tab title="Cloud">
+    Trials run in Oqoqo's managed cloud infrastructure. Each sandbox is fully provisioned and torn down automatically.
+
+    **Best for:**
+    - Running large parallel trial sets (up to 36 at a time)
+    - CI/CD integration and scheduled runs
+    - Consistent environments across team members
+
+    **Considerations:**
+    - Requires network access and cloud configuration
+    - Ideal for production-grade evals and benchmarking
+  </Tab>
+</Tabs>
+
+## Parallel trials
+
+Multiple sandboxes run simultaneously within a single experiment. Each trial gets its own isolated instance, so they don't share state or interfere with each other.
+
+For an experiment with 3 trials, Oqoqo provisions three sandboxes and runs them in parallel:
+
+```text
+sandbox-01 · trial 1   running
+sandbox-02 · trial 2   running
+sandbox-03 · trial 3   running
+
+trials  0 / 36
+```
+
+Progress is tracked in real time across all active sandboxes. You can watch them execute simultaneously and see which trials complete, succeed, or encounter friction.
+
+Running multiple trials of the same experiment reduces noise in your results. A single run might succeed or fail for reasons unrelated to what you're testing. Three parallel runs give you a more reliable signal.
+
+## Reproducibility
+
+The value of a sandbox isn't just isolation — it's that every sandbox in an experiment starts from the exact same state. Same repos. Same data. Same config.
+
+This means:
+
+- You can compare results across agents, models, and treatments with confidence that the environment isn't the variable
+- You can rerun an experiment weeks later against the same baseline and know the starting conditions haven't changed
+- You can share experiment configurations with teammates and get the same environment without manual setup
+
+The output label on every run reflects this guarantee:
+
+```text
+env: production-like · isolated · reproducible
+```
+
+<Note>
+  Reproducibility is what makes comparisons meaningful. If the environment drifts between runs, you're not measuring the agent — you're measuring the environment.
+</Note>

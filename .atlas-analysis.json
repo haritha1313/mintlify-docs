@@ -1,0 +1,87 @@
+{
+  "projectType": "saas",
+  "projectName": "Oqoqo",
+  "projectDescription": "An experimentation platform that lets teams run agentic workflows in production-like environments, measure outcomes across agents and models, and continuously improve agent-facing interfaces.",
+  "theme": "luma",
+  "primaryColor": "#7c7c7c",
+  "lightColor": "#050505",
+  "darkColor": "#c1c1c1",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "core-concepts"
+            ]
+          },
+          {
+            "group": "Experiments",
+            "pages": [
+              "experiments/overview",
+              "experiments/defining-experiments",
+              "experiments/sandboxes",
+              "experiments/agents-and-models",
+              "experiments/treatments"
+            ]
+          },
+          {
+            "group": "Evaluation",
+            "pages": [
+              "evaluation/rubrics",
+              "evaluation/traces",
+              "evaluation/metrics",
+              "evaluation/frictions"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "use-cases/agent-evals",
+              "use-cases/agent-interfaces",
+              "use-cases/ci-cd",
+              "use-cases/drift-detection",
+              "use-cases/benchmarking",
+              "use-cases/model-spend"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/faq",
+              "reference/supported-agents",
+              "reference/supported-surfaces"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Production-like isolated sandbox environments for repeatable agent runs",
+    "Multi-agent support: Claude Code, Codex, Cursor, GitHub Copilot, and more",
+    "Controlled variable experiments across agents, models, treatments, and versions",
+    "Full trajectory capture: tool calls, tokens, diffs, errors, and reasoning hooks",
+    "Automated rubric evaluation with best-practice rewrites",
+    "CI/CD integration to gate releases on agent workflow quality",
+    "Scheduled drift detection for model and dependency changes",
+    "Comparative metrics across runs: steps, tokens, cost, duration, frictions",
+    "Export and API access for trace data and results",
+    "100 free runs to get started"
+  ],
+  "publicApiSurface": [
+    "Experiment definition (workflow, treatment, agents, configuration)",
+    "Sandbox execution (local and cloud environments)",
+    "Trial management (parallel runs, trial count)",
+    "Rubric and validator configuration",
+    "Trace export (traces.jsonl)",
+    "Results API (metrics, diffs, evals outcome)",
+    "CI/CD hooks (pull_request, schedule triggers)",
+    "Library (repos + data fixtures)",
+    "Agent browser (GUI and CLI modes)"
+  ]
+}

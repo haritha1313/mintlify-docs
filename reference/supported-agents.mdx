@@ -1,0 +1,55 @@
+---
+title: "Oqoqo Supported Agents: Claude Code, Codex, and More"
+sidebarTitle: "Agents"
+description: "Oqoqo supports Claude Code and Codex today, with Cursor, GitHub Copilot, Antigravity, and OpenCode coming soon. Configure model and effort per agent."
+---
+
+Oqoqo runs your experiments through real coding agents in isolated, production-like environments. You choose which agent to use, which model variant to run, and what effort level to apply — then Oqoqo pins those choices per run so results are reproducible and comparable across experiments.
+
+## Currently supported agents
+
+| Agent | Provider | Models Available | Effort Levels | Status |
+|-------|----------|-----------------|---------------|--------|
+| Claude Code | Anthropic | Opus 4.x, Sonnet 4.x | High, Standard | Available |
+| Codex | OpenAI | GPT-5.5 | — | Available |
+
+## Coming soon
+
+| Agent | Provider | Status |
+|-------|----------|--------|
+| Cursor | Cursor | Coming soon |
+| GitHub Copilot | GitHub | Coming soon |
+| Antigravity | — | Coming soon |
+| OpenCode | — | Coming soon |
+
+## How Claude Code and Codex behave differently
+
+Claude Code and Codex solve tasks through fundamentally different strategies. Understanding the difference helps you interpret your experiment results and decide when to run both.
+
+**Claude Code** jumps to API probing quickly. Its preferred knowledge source is `help()` — it reads function signatures and docstrings, the equivalent of hovering over a method in an IDE. It builds early and iterates: try something, test it, fix it, test again. This reactive loop works well on simpler, well-scoped tasks where the API surface is familiar or well-documented. On complex tasks with ambiguous dependencies, the error-correction cycles accumulate cost.
+
+**Codex** explores the workspace methodically before writing any code. Its first action is typically environment exploration — checking installed packages, reading `requirements.txt`, surveying the project structure. It prefers `inspect.getsource()` (87.3% of trials) to read actual implementations rather than docstrings, and it explores 3–17× more broadly than Claude Code before writing a single line. The upfront investment pays off on complex tasks: Codex enters the build phase with more context and encounters fewer error-correction cycles as a result.
+
+The practical consequence: **Claude Code** is faster on simpler tasks and more sensitive to docstring quality. **Codex** is more reliable on complex tasks and more sensitive to source code clarity. Run both in the same experiment to see which handles your product's API more effectively.
+
+<Note>
+  Technology mismatch causes near-zero scores. When a task description doesn't name the target library explicitly, agents sometimes default to a familiar alternative — for example, using SQLite instead of the intended vector database. In the benchmark data behind these findings, every one of those mismatch trials scored close to zero. Name your library explicitly in task instructions.
+</Note>
+
+## Model and effort configuration
+
+You can select a model variant and effort level independently for each agent in an experiment. The available configurations for Claude Code are:
+
+- **Opus · High** — most capable, highest cost; use for complex codebase tasks where accuracy matters most
+- **Sonnet · High** — balanced capability and cost; a good default for most experiment runs
+- **Sonnet · Standard** — lower cost; suitable for simpler workflows or high-volume runs where budget is a constraint
+
+Lower effort levels reduce token spend but may reduce quality on tasks that require deep reasoning or multi-step recovery. Run the same workflow across model tiers to find where cheaper models match expensive ones — see [Optimize model spend](/use-cases/model-spend) for a walkthrough.
+
+<Tip>
+  Run Opus · High on a small trial set first to establish a quality ceiling. Then run Sonnet · Standard on the same workflow to see how much quality you give up at lower cost. The gap tells you where to invest.
+</Tip>
+
+<Note>
+  Oqoqo pins the agent version and model version for each experiment run. The same agent behaves consistently within an experiment, and results remain reproducible when you rerun or compare across iterations.
+</Note>

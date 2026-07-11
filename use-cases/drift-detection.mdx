@@ -1,0 +1,77 @@
+---
+title: "Detect Agent Workflow Drift from Models and Dependencies"
+sidebarTitle: "Drift Detection"
+description: "Schedule Oqoqo experiments to run automatically as models, dependencies, and your product evolve — and catch regressions before your users do."
+---
+
+Your code didn't change. Your agent workflows did. Model updates, dependency upgrades, and subtle product shifts can silently degrade the agent workflows your users depend on — without triggering a single CI check. Oqoqo's scheduled runs let you rerun the same experiments on a cadence and get notified the moment something drifts.
+
+## What drift is
+
+Drift is a regression without a commit. The surface you're testing hasn't changed — or at least, no change you made caused the problem. But agent performance on a given workflow has degraded: pass rate dropped, token usage climbed, new friction points appeared. Something in the environment changed around your product, and your users are the ones who find out.
+
+This is the class of failure that CI gating alone can't catch, because it happens between code changes, not because of them.
+
+## Sources of drift
+
+<CardGroup cols={2}>
+  <Card title="Model updates" icon="brain" href="/reference/supported-agents">
+    A new model version may behave differently on the same task. Providers update models on their own schedules, and the update isn't always announced in a way that triggers your alerting. A model that reliably completed a workflow at 90% pass rate might drop to 70% after a silent update.
+  </Card>
+  <Card title="Dependency upgrades" icon="package" href="/experiments/sandboxes">
+    A library update can change a method signature, alter a return type, or remove a helper that agent workflows relied on. The library's own tests pass. Yours do too. But the agent that was reading `inspect.getsource()` on the old version is now reading different source code.
+  </Card>
+  <Card title="Product changes" icon="wrench" href="/use-cases/agent-interfaces">
+    A refactor that looks purely internal might alter the surface an agent uses. An error message rewrite, a response field rename, or a change to default pagination behavior can break agent workflows even when the change was intentional and correct from a human-facing perspective.
+  </Card>
+  <Card title="Accumulated context drift" icon="clock" href="/evaluation/metrics">
+    Over time, models see different training data, fine-tuning updates, and RLHF adjustments. Behavior on the same prompt can shift gradually in ways that are hard to attribute to any single change.
+  </Card>
+</CardGroup>
+
+## How Oqoqo detects drift
+
+Configure a schedule — nightly, weekly, or a custom cron — and Oqoqo reruns the same experiments with the same inputs on every cycle. Each run is compared to the previous baseline: pass rate, token usage, cost per trial, duration, and friction count. Any significant change is flagged and surfaced in the run comparison view.
+
+Because the inputs are held constant (same task, same rubric, same library, same agent), any change in output is attributable to a change in the environment — the model, the dependencies, or your product surface.
+
+## Setting up scheduled drift detection
+
+<Steps>
+  <Step title="Choose the experiments to monitor">
+    Start with your most critical workflows — the ones that directly affect user-facing functionality or revenue. These are the experiments where a silent regression would cause the most damage.
+  </Step>
+  <Step title="Set the schedule">
+    Configure how often you want the experiments to rerun:
+
+    ```yaml
+    schedule: nightly
+    ```
+
+    For workflows that depend on frequently updated models or unstable dependencies, nightly is appropriate. For more stable surfaces, weekly may be sufficient.
+  </Step>
+  <Step title="Configure alerting">
+    Set up notifications for when results differ significantly from the baseline. You can alert on absolute pass rate drop (e.g., more than 10 percentage points), relative change in token usage, or the appearance of new friction point categories.
+  </Step>
+  <Step title="Review the comparison">
+    When an alert fires, open the run comparison. Review which metrics changed between the baseline run and the current run, and which rubric criteria started failing that were passing before.
+  </Step>
+  <Step title="Trace the failure">
+    Drill into the trace for the failing trials. The trace records every tool call, command, and error in sequence — you'll be able to see whether the agent took a different path, hit a new error, or stalled at a step that used to be smooth.
+  </Step>
+</Steps>
+
+## Reading a drift report
+
+A drift report compares two runs of the same experiment. Focus on these signals:
+
+- **Increased token usage** — if the agent is using significantly more tokens on the same task, it's working harder to reach the same outcome. Something in the surface got harder to navigate.
+- **Lower pass rate** — one or more rubric criteria that were passing consistently are now failing. This is the clearest signal of a regression.
+- **New friction points** — friction categories that weren't appearing in previous runs are now appearing. The surface changed in a way agents can't handle as cleanly.
+- **Higher step count** — the agent is taking more steps to complete the task. It may be retrying, exploring dead ends, or recovering from errors it didn't encounter before.
+
+If pass rate dropped and token usage climbed on the same run cycle, that's a strong signal of a meaningful regression worth investigating immediately.
+
+<Note>
+  Drift detection is especially important when you depend on third-party models whose update schedule you don't control. A model provider can ship a new version overnight — scheduled runs let you catch the impact before your users do.
+</Note>

@@ -1,0 +1,111 @@
+---
+title: "Frictions: Find Where Agents Struggle on Your Product"
+sidebarTitle: "Frictions"
+description: "Frictions are the steps where an agent stalled, retried, or gave up. Oqoqo surfaces them automatically so you know exactly where to improve."
+---
+
+When an agent runs into your product's surfaces — your API, SDK, CLI, or MCP server — it doesn't always proceed smoothly. Sometimes it stalls. Sometimes it retries the same call. Sometimes it gives up on a subtask entirely. Oqoqo calls these moments **frictions** and logs them automatically for every trial. They are the most direct measurement of where your agent-facing interface breaks down.
+
+## What frictions are
+
+A friction is logged any time an agent:
+
+- Encounters an error and retries the same or similar action
+- Makes repeated similar tool calls without progressing (stuck in a loop)
+- Stalls before proceeding to the next step
+- Abandons a subtask and moves on without completing it
+- Calls an unexpected tool or endpoint that wasn't part of the intended path
+
+Each friction is recorded with the step number and the surrounding context — the error message, the tool called, and the agent's stated reasoning if the reasoning hook was active.
+
+## How frictions appear
+
+<CardGroup cols={2}>
+  <Card title="In the Traces tab" icon="magnifying-glass" href="/evaluation/traces">
+    Friction steps are highlighted with ✗ markers inline with the trace. Expand the step to see the full error context and what the agent did next.
+  </Card>
+  <Card title="In the Compare view" icon="chart-bar" href="/evaluation/metrics">
+    A Frictions summary shows the most common friction points aggregated across all trials in the experiment — so you can see which steps are consistently problematic, not just in one run.
+  </Card>
+</CardGroup>
+
+## Why frictions matter
+
+A friction at the same step across multiple trials is a design signal, not a model limitation. It means your agent-facing interface invited one action but rewarded something else — what designers call an affordance failure.
+
+The agent isn't guessing randomly. It's acting on the most plausible interpretation of what your surface offers. When it keeps failing at the same point, the surface is making a promise it doesn't keep: a method name that suggests one behavior but does another, an error message that reports what went wrong without saying what to do instead, a type that looks like one thing but behaves like another.
+
+Frictions don't mean the agent is broken. They mean your interface has a friction point — and a friction point is fixable.
+
+<Info>
+  Frictions are distinct from eval failures. A trial can pass all rubric criteria and still have frictions — the agent found a path to success, but it had to work harder than it should have.
+</Info>
+
+## Using frictions to improve
+
+The friction log tells you exactly where to look. Use this workflow to turn friction data into interface improvements:
+
+<Steps>
+  <Step title="Open the friction step in the trace">
+    Navigate to the step flagged as a friction. Read the full error message, tool call, and the agent's reasoning hook entry if available.
+  </Step>
+  <Step title="Read the error or stall context">
+    Understand what the agent tried and what it received. Was it a naming mismatch? A type error? A 404 with no guidance? A method that doesn't exist in the installed version?
+  </Step>
+  <Step title="Identify the root cause">
+    Classify the friction:
+    - **Naming issue** — the agent called the wrong method because the name was ambiguous
+    - **Missing example** — the agent guessed the wrong response shape because no real example was shown
+    - **Confusing error message** — the error reported what went wrong but not how to recover
+    - **Type mismatch** — the API and SDK return the same value in different types
+    - **Too many similar options** — the agent chose the wrong tool from a set of near-identical names
+  </Step>
+  <Step title="Update your interface">
+    Fix the root cause: rename a method, add an alias, update an error message, add a docstring with a real return value example, consolidate overlapping tools, or align types across surfaces.
+  </Step>
+  <Step title="Rerun the experiment">
+    Run the same experiment against your updated interface. Oqoqo captures fresh metrics, traces, and friction logs for the new version.
+  </Step>
+  <Step title="Compare friction count before and after">
+    Use the Compare view to check whether the friction at that step disappeared. If it dropped but didn't vanish, read the new trace to see whether the agent is now failing at the next step — the fix may have revealed a downstream issue.
+  </Step>
+</Steps>
+
+## Common friction patterns
+
+These are the friction patterns that appear most often when agents work against real product surfaces:
+
+<AccordionGroup>
+  <Accordion title="AttributeError on method name">
+    The agent called `find()` instead of `run_query()` because `find` is the most common name for a search operation. The installed client doesn't have `find`, so the call fails.
+
+    **Fix:** Rename the method, add an alias, or update the error message to name the correct method:
+    ```text
+    AttributeError: 'find' was removed in 1.10. Use 'run_query'.
+    ```
+  </Accordion>
+  <Accordion title="Type mismatch">
+    The API returns a string ID over REST; the SDK returns a `uuid.UUID` object. Both are called `id`. The agent fetches both, compares them, and gets `False` — with no error, no warning.
+
+    **Fix:** Align the types across surfaces, or document the difference explicitly with a concrete example showing both forms.
+  </Accordion>
+  <Accordion title="404 with no guidance">
+    A deprecated endpoint returns `404 Not Found` instead of `410 Gone` with a redirect. The agent hits the 404, learns nothing, and starts guessing alternative paths.
+
+    **Fix:** Return `410 Gone` with an error body that names the current replacement endpoint and its expected request shape.
+  </Accordion>
+  <Accordion title="Ambiguous tool names">
+    An MCP server exposes `search_files`, `find_file`, `get_file`, and `read_document`. All four look plausible for the task. The agent tries them in order, burning a round trip on each wrong guess.
+
+    **Fix:** Consolidate overlapping tools into one, or rewrite tool descriptions to make their differences unambiguous at a glance.
+  </Accordion>
+  <Accordion title="Missing response examples">
+    The docs describe what to call but don't show what comes back. The agent calls the right method and writes code against an imagined response shape — which fails when the real object arrives.
+
+    **Fix:** Add docstrings with a real, current return value. One concrete example collapses multiple guesses into a single act of recognition.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Frictions are the most direct measurement of your product's affordance for AI agents. Each friction is a design signal — the agent recorded exactly where your surface misled it, in full detail, for free.
+</Tip>

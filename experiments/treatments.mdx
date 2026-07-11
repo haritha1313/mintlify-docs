@@ -1,0 +1,72 @@
+---
+title: "Treatments: Test Variables Across Agent Experiments"
+sidebarTitle: "Treatments"
+description: "Use treatments to isolate variables in your Oqoqo experiments: compare raw agent behavior against skills, MCP servers, updated APIs, and more."
+---
+
+A treatment is the controlled variable in your experiment — the one thing you change between runs while holding everything else constant. By defining treatments explicitly, you can attribute differences in outcome to a specific change rather than to noise, model variance, or environmental drift. Treatments are how experimentation stays scientific.
+
+## Built-in treatments
+
+Oqoqo ships with a set of standard treatments that cover the most common things teams want to test.
+
+### Baseline (raw)
+
+The agent receives no additional context, skills, or tools beyond what's already in the sandbox. It works purely from the task instruction and whatever it can discover through runtime exploration.
+
+Use the Baseline treatment as your control. Every other treatment you add is measured against it.
+
+### + skill
+
+The agent is given a `SKILL.md` file to load before starting the task. Skills are structured, agent-readable documents that describe how to use a specific interface, workflow, or API surface.
+
+This treatment answers the question: *does providing a skill improve how the agent uses your product?*
+
+### + MCP
+
+The agent is given access to an MCP server — a Model Context Protocol server that exposes tools, resources, or context the agent can call during the run.
+
+This treatment answers the question: *does giving the agent access to this MCP server change the outcome?*
+
+### Official skills
+
+The agent loads your product's published official skills, if they exist. This lets you test whether the skills you've already shipped are actually helping agents succeed.
+
+### Official MCP
+
+The agent uses your product's published official MCP server. This is the same MCP surface your users would interact with — tested under controlled, measurable conditions.
+
+## Comparing treatments
+
+Select multiple treatments in a single experiment to get a direct side-by-side comparison. Oqoqo runs each treatment in its own sandbox, captures the full trace, metrics, and eval outcomes for each, and presents them together.
+
+A typical comparison looks like this:
+
+| Treatment | Pass rate | Tokens | Steps | Cost |
+|---|---|---|---|---|
+| Baseline · raw | 1 / 3 | 8.4M | 23 | $5.25 |
+| + skill | 3 / 3 | 4.1M | 14 | $2.60 |
+
+From this you can see that adding the skill more than doubled the pass rate, cut token usage in half, and reduced cost significantly — all from the same task, library, and agent.
+
+<Tip>
+  Always include a Baseline treatment so you have a reference point when comparing results.
+</Tip>
+
+## Custom treatments
+
+If you're testing something that doesn't map to a built-in treatment — a new API version, a modified SDK interface, an updated CLI help output — you can define a custom treatment. Describe what you're adding or changing, and Oqoqo tracks it as a named variable across your runs.
+
+Custom treatments work the same way as built-in ones: they're held constant within their trial set and compared against every other treatment in the experiment.
+
+## Why treatments matter
+
+Without controlled treatments, you can't isolate the cause of a change. If you add a skill *and* upgrade to a better model *and* update your API in the same run, you won't know which change drove the improvement.
+
+Treatments let you ask precise questions:
+
+- Does adding a skill reduce token usage for this workflow?
+- Does the official MCP server improve pass rate compared to raw behavior?
+- Does a cheaper model perform as well as an expensive one when a skill is present?
+
+Consider a team testing whether a skill helps their agent handle a checkout flow. They run the same experiment with two treatments — Baseline and + skill — across three trials each. The Baseline fails two out of three times on the rubric criterion "Reports cache state". The + skill treatment passes all three. That result is actionable: the skill is filling a gap the agent can't bridge on its own.

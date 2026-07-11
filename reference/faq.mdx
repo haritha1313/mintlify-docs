@@ -1,0 +1,72 @@
+---
+title: "Frequently Asked Questions About the Oqoqo Platform"
+sidebarTitle: "FAQ"
+description: "Answers to common questions about Oqoqo: free trials, setup time, supported agents, how experiments differ from sandboxes, and more."
+---
+
+Oqoqo is an experimentation platform built for the agentic era. If you're new to the platform or evaluating whether it fits your workflow, the answers below cover the most common questions about getting started, what you can test, and how results are captured and exported.
+
+<AccordionGroup>
+
+  <Accordion title="Is there a free trial?">
+    Yes. You get up to 100 runs for free — no credit card required. That's enough to run a full experiment suite, compare multiple agents, and see the results before committing to a paid plan.
+  </Accordion>
+
+  <Accordion title="How long does it take to set up my first experiment?">
+    A few minutes. Pick one of the built-in templates or define your own experiment from scratch, then configure the environment. The template library covers common workflows like SDK integration, CLI testing, and MCP server evaluation, so you can launch a first run without writing anything from scratch.
+  </Accordion>
+
+  <Accordion title="Why can't I just use Codex or Claude Code directly to test my product?">
+    You can, and you should. Running an agent against your product manually is a great first step. Oqoqo turns that useful one-off step into repeatable testing: the same workflow runs across controlled tasks, multiple agents, different model versions, different environments, and different product changes. Instead of re-running manually after each release, you get a consistent, comparable record of how your product performs for agents over time.
+  </Accordion>
+
+  <Accordion title="How is this different from running my own tests in a sandbox?">
+    A sandbox just runs the agent. Oqoqo runs the whole experiment around it:
+
+    - **Production-like environments** with real repos, data, and files — not mock stubs
+    - **Controlled variables** across agents, models, versions, and treatments so results are comparable
+    - **Full traces, metrics, diffs, and evals** on every run, not just a pass/fail signal
+    - **Repeatable at scale** so you can rerun the same experiment after a model update, a dependency bump, or a product change
+
+    The outcome is a structured record you can query, compare, and act on — not a one-off script you have to build and maintain yourself.
+  </Accordion>
+
+  <Accordion title="What agents can I run?">
+    Oqoqo currently supports **Claude Code** (Anthropic) and **Codex** (OpenAI). Support for Cursor, GitHub Copilot, Antigravity, and OpenCode is coming soon.
+
+    For the agents that are available today, you can configure the model variant (for example, Opus 4.x or Sonnet 4.x for Claude Code) and the effort level per agent. Run different configurations side by side in the same experiment to compare cost and quality across model tiers.
+  </Accordion>
+
+  <Accordion title="What surfaces can I cover?">
+    SDKs, REST APIs, CLIs, MCP servers, agent skills, and more. Anything an agent would touch when working with your product can be tested and evaluated. See [Surfaces](/reference/supported-surfaces) for a breakdown of how agents interact with each surface type and what to look for when testing.
+  </Accordion>
+
+  <Accordion title="Can I set rubrics for evaluation?">
+    Yes. You define a basic rubric describing what a correct outcome looks like, and Oqoqo rewrites it to follow evaluation best practices — structured criteria, consistent scoring, and clear pass/fail conditions. You get high-grade eval results at scale without needing to be an eval expert.
+  </Accordion>
+
+  <Accordion title="Can I see the agent traces behind a result?">
+    Yes. Every run records a complete trajectory: files read, commands issued, tool calls made, errors hit, and the exact step where the agent recovered or stopped. A reasoning hook also captures the "why" behind each agent decision throughout the run — not just what it did, but what it was trying to do when it did it.
+
+    Traces are stored in the trial workspace and are accessible from the results view for every published run.
+  </Accordion>
+
+  <Accordion title="Do agents read my documentation site?">
+    No. Research across 112 benchmark trials found that neither Claude Code nor Codex performed a single web search or fetched a documentation page — zero, across all trials. Agents discover your API through `help()`, `inspect.getsource()`, and runtime probing of the installed package.
+
+    This means your docstrings, function signatures, error messages, and source code clarity matter far more than your docs site when it comes to agent performance. Oqoqo's baseline runs surface exactly where those in-product signals break down.
+  </Accordion>
+
+  <Accordion title="How do I export my results?">
+    Download `traces.jsonl` from any trial workspace to get the full structured trace for offline analysis. You can also use the API to access metrics, diffs, and eval outcomes programmatically — for example, to feed results into your own dashboards or alerting systems.
+  </Accordion>
+
+  <Accordion title="Can I run experiments on a schedule?">
+    Yes. Configure `schedule: nightly` or a custom cron expression to rerun your experiment suite automatically. Scheduled runs are useful for catching drift from model updates, dependency version bumps, and changes to your own product that silently break agent workflows.
+  </Accordion>
+
+  <Accordion title="Can I integrate Oqoqo with CI/CD?">
+    Yes. Configure `on: pull_request` to run your experiment suite on every PR. Failed evals block the merge, so agent-breaking changes don't ship. This gives you the same confidence for agent-facing surfaces that unit tests give you for internal logic.
+  </Accordion>
+
+</AccordionGroup>

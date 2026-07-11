@@ -1,0 +1,115 @@
+---
+title: "Defining an Oqoqo Experiment: Tasks, Rubrics, and Library"
+sidebarTitle: "Define Experiments"
+description: "Learn how to define a repeatable Oqoqo experiment: write a task, add a rubric, attach your library, and select agents and treatments."
+---
+
+Defining an experiment is how you turn a workflow into something repeatable and measurable. You specify what the agent should do, how to judge whether it succeeded, which repos and data it should work with, and which agents and treatments to run. Oqoqo takes that configuration and executes it consistently every time you launch a run.
+
+## Writing a task
+
+The task is a natural-language instruction that the agent receives at the start of every trial. Write it the way you'd brief a capable engineer: be specific about what you want done, describe the expected output format, and include any constraints the agent needs to know.
+
+```text
+Open five product pages in parallel browser tabs, extract the price
+from each, and return them as a JSON array in page order.
+```
+
+**Tips for effective tasks:**
+
+- State the expected output format explicitly (JSON array, markdown file, diff, etc.)
+- Describe constraints that matter (order, shape, side effects to avoid)
+- Scope the task to a single workflow — broader scope makes evals harder to interpret
+- Avoid embedding pass/fail logic in the task itself; that belongs in the rubric
+
+## Adding a rubric
+
+A rubric defines the criteria your eval will score against. You write a basic rubric in plain language; Oqoqo rewrites it to follow eval best practices — so you get high-grade, consistent scoring without having to author complex eval harnesses yourself.
+
+**Example rubric criteria for the parallel-tab-pool task:**
+
+- Returns requested shape
+- Preserves order
+- Reports cache state
+
+Each criterion becomes a pass/fail check. The combination of criteria produces an overall eval outcome for the trial.
+
+<Tip>
+  Keep each criterion atomic — one thing to check per line. Compound criteria are harder to score and harder to act on.
+</Tip>
+
+## Attaching a library
+
+The library is the set of repos and data fixtures that every trial in your experiment will have access to. Because it's held constant across all runs, any difference in outcome is attributable to what you vary — not to what code or data the agent saw.
+
+Add repos and data fixtures to your library from the **Lab › Define Experiment** screen:
+
+- **Repos** — source code the agent can read, edit, and run against (e.g., `acme/checkout-flows`, `acme/web-platform`)
+- **Data fixtures** — structured data files the agent can use during the task (e.g., `data/pricing-fixtures`)
+
+The library is cloned fresh into each sandbox at the start of every trial.
+
+## Selecting from the task library
+
+You don't have to start from scratch. Oqoqo ships with a built-in library of pre-defined tasks you can select, review, and adapt to your workflow.
+
+| Task | Description |
+|---|---|
+| `parallel-tab-pool` | Open pages in parallel, extract data, return structured output |
+| `navigate-spa-history` | Navigate a single-page app and assert history state |
+| `session-cookie-refresh` | Test session cookie handling across authenticated flows |
+| `scrape-paginated-table` | Extract data from a multi-page table structure |
+| `retry-flaky-fetch` | Test retry and backoff behavior for unreliable fetch calls |
+
+<Tip>
+  Use templates to skip setup. Pick a task from the library and modify it to fit your workflow.
+</Tip>
+
+## Advanced options
+
+When you're ready to go beyond the defaults, the **Advanced** panel exposes additional configuration:
+
+- **Trial count** — how many parallel runs to launch (up to 36 in a single experiment)
+- **Environment** — run trials locally on your machine or in Oqoqo's managed cloud environment
+- **Parallel execution** — all trials within an experiment run simultaneously by default; you can adjust this if your environment has resource constraints
+
+## Defining an experiment step by step
+
+<Steps>
+  <Step title="Open the experiment definition screen">
+    Navigate to **Lab › Define Experiment** in the Oqoqo UI. This is where you configure every component of the experiment before launch.
+  </Step>
+  <Step title="Write or select a task">
+    Enter a natural-language instruction in the task field, or choose an existing task from the task library. You can edit any library task before saving it to your experiment.
+  </Step>
+  <Step title="Add a rubric">
+    Click **+ Add rubric** and enter your evaluation criteria. Oqoqo will rewrite your rubric to eval best practices before the first run.
+  </Step>
+  <Step title="Attach your library">
+    Add the repos and data fixtures your agent will need. These are cloned into each sandbox at run time.
+  </Step>
+  <Step title="Select agents and treatments">
+    Open the **Agent Browser**, choose which agents to run (e.g., Opus · High, Sonnet · High), and select one or more treatments (Baseline, + skill, + MCP).
+  </Step>
+  <Step title="Configure environment and trial count">
+    Set your environment (local or cloud) and the number of parallel trials. Review all settings in the summary panel.
+  </Step>
+  <Step title="Launch">
+    Click **Launch**. Oqoqo provisions sandboxes, runs your trials, and begins streaming results.
+  </Step>
+</Steps>
+
+## CLI
+
+You can define and launch an experiment entirely from the command line using the `oqo` CLI.
+
+```bash
+oqo experiment create \
+  --workflow refactor-auth \
+  --treatment skill \
+  --agents "opus:high,sonnet:high" \
+  --trials 3 \
+  --env cloud
+```
+
+The CLI uses the same configuration model as the GUI. Any experiment defined in the UI can be exported and re-run via the CLI, and vice versa.

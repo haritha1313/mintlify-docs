@@ -1,0 +1,66 @@
+---
+title: "Optimize Model Spend by Comparing Agent Performance"
+sidebarTitle: "Model Spend"
+description: "Find where cheaper models match expensive ones on your workflows. Compare pass rate, cost, and tokens to make confident model-swap decisions."
+---
+
+Running the most capable model for every workflow is the path of least resistance — but it's rarely the most efficient one. Some tasks don't need Opus-level reasoning. Oqoqo lets you run the same workflows across multiple model variants, compare pass rates and costs in the same view, and make confident decisions about where to swap down without sacrificing quality.
+
+## The problem
+
+You're running expensive models everywhere by default. It's the safe choice — the most capable models are the most forgiving of ambiguous instructions, imperfect surfaces, and complex workflows. But that safety comes at a cost: some of your workflows are straightforward enough that a cheaper model performs just as well, at a fraction of the price.
+
+The challenge is knowing which workflows those are. Without a repeatable way to compare model performance on your specific tasks, every decision is a guess. You either overspend on capability you don't need, or you swap models without evidence and discover the regression in production.
+
+## How Oqoqo helps
+
+Run the same workflow across multiple model variants as separate treatments. For example, run a workflow with Opus · High, Sonnet · High, and GPT-5.5 as three treatments in the same experiment. Oqoqo runs each treatment through the same task, against the same rubric, in the same environment — and surfaces the results in a single comparison view.
+
+You see pass rate, token usage, and cost per trial for every model in the same place, with traces available for any trial where results diverge.
+
+## What to compare
+
+When you review a model spend comparison, focus on these dimensions:
+
+- **Pass rate** — does the cheaper model still meet your rubric criteria at an acceptable rate? A model that costs half as much but passes 30 percentage points less often isn't a savings — it's a regression.
+- **Token usage** — does the cheaper model use more or fewer tokens? Cheaper models are sometimes less efficient at navigating complex surfaces, which can eat into the cost savings.
+- **Cost** — the total experiment cost at each model tier, including both input and output tokens. Combine with pass rate to get cost per successful trial.
+- **Duration** — wall-clock time per trial. A cheaper model might be slower, which matters if your workflows are latency-sensitive.
+- **Frictions** — does the cheaper model struggle more at specific steps? A higher friction count on the same task is a signal that the model is working harder to navigate your surface — which often means more retries, more tokens, and less reliable outcomes.
+
+## Making the decision
+
+Replace with a cheaper model only when the evidence supports it:
+
+- Pass rate is within your acceptable threshold (for example, at least 90% of the expensive model's pass rate)
+- Friction count is not significantly higher — if the cheaper model is struggling more, the savings are less real than they look
+- The cost savings justify any quality trade-off for that specific workflow — a workflow that touches revenue or user-facing output deserves a tighter threshold than an internal reporting job
+
+When those conditions hold, you have evidence for the swap. When they don't, you have evidence to keep the current model — and you can point to the data if anyone asks why.
+
+## How to run a model spend comparison
+
+<Steps>
+  <Step title="Pick a workflow to optimize">
+    Start with a workflow that runs frequently and has meaningful model costs — one where savings would actually add up. Avoid starting with your most complex workflows; simple-to-moderate tasks are where cheaper models are most likely to perform equivalently.
+  </Step>
+  <Step title="Select 2–3 model variants as separate treatments">
+    Choose the model tiers you want to compare. A typical comparison might include your current expensive model as baseline and one or two cheaper alternatives as treatments. You can run different models and effort levels (e.g., Sonnet · Low vs Sonnet · High) in the same experiment.
+  </Step>
+  <Step title="Use the same task, rubric, and library for all treatments">
+    Hold everything constant except the model. Same task instruction, same rubric criteria, same library. Any difference in results is attributable to the model, not to variation in the experiment setup.
+  </Step>
+  <Step title="Run 3+ trials per model">
+    Run at least three trials per model variant to get a reliable pass rate estimate. Non-determinism in agent behavior means a single trial can pass or fail for reasons unrelated to the model's capability.
+  </Step>
+  <Step title="Compare cost, pass rate, tokens, and frictions in the Compare view">
+    Open the Compare view when all trials complete. Review each dimension side by side: which model has the highest pass rate, which has the lowest cost per trial, which has the fewest friction points.
+  </Step>
+  <Step title="Make the swap for workflows where cheaper models perform equivalently">
+    For workflows where a cheaper model meets your pass rate threshold and doesn't show meaningfully higher friction, configure that workflow to use the cheaper model. Document the benchmark result so the decision is traceable.
+  </Step>
+</Steps>
+
+<Note>
+  Model spend optimization works best when you have a clear rubric. Without measurable pass/fail criteria, you can't reliably tell if a cheaper model is "good enough" — you're back to guessing. Define your rubric before you compare models, not after.
+</Note>

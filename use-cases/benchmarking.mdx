@@ -1,0 +1,74 @@
+---
+title: "Build a Benchmark for How Agents Perform on Your Product"
+sidebarTitle: "Benchmarking"
+description: "Turn your product's user journeys into a repeatable benchmark suite that scores how well AI agents can accomplish real tasks on your product."
+---
+
+A benchmark is a stake in the ground. It tells you, in numbers, how well agents perform on your product today — and gives you a way to show that your changes are making things better. Oqoqo lets you turn your real user journeys into a curated, repeatable benchmark suite that you can run against any agent version, any product version, any time.
+
+## What a product benchmark is
+
+A benchmark is a curated set of tasks drawn from your real user journeys. Each task has a rubric that defines what success looks like. Running the full suite gives you a scorecard: how many tasks do agents complete successfully, how efficiently, and at what cost.
+
+Unlike an ad-hoc eval, a benchmark is fixed and versioned. You run the same tasks, against the same rubrics, in the same environment, every time. That consistency is what makes improvement measurable — when you change your SDK, add a skill, or update an error message, you can rerun the benchmark and see whether agents do better or worse on specific tasks.
+
+## Why build a benchmark
+
+<CardGroup cols={2}>
+  <Card title="Quantify agent-readiness" icon="chart-bar" href="/evaluation/metrics">
+    Turn a subjective question — "how well do agents work with our product?" — into a number: pass rate, average tokens, average cost per task, friction count. Benchmark scores are specific enough to act on.
+  </Card>
+  <Card title="Compare versions" icon="code-compare" href="/experiments/treatments">
+    Run the same benchmark against different versions of your product or against different agent versions. See exactly which tasks got better or worse, not just whether overall quality moved.
+  </Card>
+  <Card title="Communicate agent-readiness" icon="megaphone" href="/evaluation/rubrics">
+    Share benchmark results with your team, your customers, or your leadership. A scorecard with real tasks and real pass rates is more credible than a claim that your product "works great with AI."
+  </Card>
+  <Card title="Track improvement over time" icon="arrow-trend-up" href="/use-cases/drift-detection">
+    Each benchmark run is versioned. As you ship improvements — better docstrings, cleaner error messages, a well-tuned skill — the benchmark shows the cumulative effect. You build a history of how agent-readiness has evolved.
+  </Card>
+</CardGroup>
+
+## What to include in a benchmark
+
+The most valuable benchmarks are grounded in real usage, not invented scenarios. Build yours around:
+
+- **Your most common agent workflows** — the tasks agents actually attempt with your product today. If 80% of your database provisioning is done by agents, your benchmark should include provisioning tasks.
+- **Known edge cases and complex scenarios** — the tasks where agents tend to struggle: multi-step workflows, error recovery, tasks that require reading existing code before modifying it.
+- **Tasks at different difficulty levels** — simple CRUD operations, multi-step workflows, and complex codebase modifications. A benchmark with only easy tasks won't tell you how your surface handles harder real-world use.
+- **Rubrics that test both correctness and efficiency** — success isn't just getting the right answer. A rubric that also tests token budget and step count gives you a richer signal about whether improvements are actually helping.
+
+## Building your benchmark in Oqoqo
+
+<Steps>
+  <Step title="List 5–20 representative user journeys">
+    Write down the real tasks agents do with your product. Look at your support tickets, your onboarding flows, and the workflows your most active users run. Start small — 10 well-chosen tasks is enough to begin.
+  </Step>
+  <Step title="Write each journey as an Oqoqo task with a rubric">
+    For each user journey, write a task (a natural-language instruction describing what the agent should do) and a rubric (the criteria that define success). Be specific about both: vague tasks produce noisy results.
+  </Step>
+  <Step title="Attach a shared library">
+    Use the same repos and data for all benchmark tasks. A shared library means every task runs in a consistent environment, and differences in results are attributable to the task and rubric — not to environment variation.
+  </Step>
+  <Step title="Run the full suite against a baseline agent">
+    Run the complete benchmark with a Baseline treatment: no skill, no MCP, just the agent and the library. This establishes your starting point — the pass rate, tokens, and cost before any improvements.
+  </Step>
+  <Step title="Review the scorecard">
+    Read the benchmark results as a scorecard. Which tasks pass consistently? Which fail? Where are the friction points concentrated? The tasks with the lowest pass rates or highest token usage are your best candidates for improvement.
+  </Step>
+  <Step title="Version your benchmark and rerun as your product evolves">
+    As you ship improvements, rerun the same benchmark and compare. Oqoqo versions each run, so you can track how scores change across iterations of your product and build a history of agent-readiness over time.
+  </Step>
+</Steps>
+
+## Tracking progress over time
+
+Each benchmark run produces a versioned scorecard. Comparing scorecard versions shows you whether your improvements actually help agents — not just whether they help humans.
+
+When you improve a docstring, update an error message, or ship a new skill, rerun the benchmark. Look at which tasks moved: which pass rates went up, which friction points disappeared, which token counts dropped. If a change made things worse somewhere unexpected, you'll see it before it ships.
+
+Over time, your benchmark becomes a living record of your product's agent-readiness — one you can share with your team and your customers as evidence that the work is paying off.
+
+<Tip>
+  A benchmark with 10 well-chosen tasks that reflect real usage is more valuable than one with 50 tasks that cover theoretical edge cases. Start with the workflows that matter most to your users, and expand from there.
+</Tip>

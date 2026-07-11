@@ -1,0 +1,80 @@
+---
+title: "Core Concepts: Experiments, Trials, Rubrics, and Traces"
+sidebarTitle: "Core Concepts"
+description: "Understand the key building blocks of an Oqoqo experiment: tasks, rubrics, sandboxes, trials, agents, treatments, traces, and metrics."
+---
+
+Every Oqoqo experiment is built from a small set of composable concepts. Understanding them makes it much easier to design experiments that produce clear, actionable results — and to interpret what you see when runs complete. This page defines each concept in the order you encounter it.
+
+### Experiment
+
+An experiment is the top-level container in Oqoqo. It bundles together a workflow (the task you want the agent to perform), a treatment or set of treatments (the variables you're testing), the agents that will run it, and all supporting configuration (library, environment, rubric, trial count). Defining an experiment once lets you rerun it any time — on demand, on a schedule, or triggered by CI/CD — and always get comparable results.
+
+### Task
+
+A task is the natural-language instruction that tells the agent what to accomplish. It plays the same role as a prompt in a chat interface, but in Oqoqo it's versioned, attached to a specific experiment, and held constant across every trial so the only variables are the ones you've explicitly chosen to change. A good task is specific about the goal, the expected output format, and any constraints the agent should respect.
+
+### Rubric
+
+A rubric defines the evaluation criteria for a task — the conditions that determine whether a trial passed or failed. You write a rubric in plain language (for example, "Returns the correct JSON shape," "Preserves page order," "Reports cache state"). Oqoqo's system automatically rewrites your rubric to follow best practices before applying it, so you get high-quality, consistent eval results without having to be an eval expert. Each rubric criterion produces an independent pass/fail signal in the Evals tab.
+
+### Library
+
+The library is the collection of repos and data fixtures you attach to an experiment. Before each trial starts, Oqoqo checks out every item in the library into the sandbox, giving the agent the same files, code, and data every time. This is what makes trials reproducible: the environment isn't just isolated, it's identical across runs. You can attach multiple repos and data sets to a single experiment.
+
+### Environment
+
+The environment determines where sandboxes run — **local** (on your own infrastructure) or **cloud** (Oqoqo-managed). You set this once per experiment, and every trial uses the same environment type. The environment setting does not change what the agent sees; it determines where compute happens and who manages provisioning.
+
+### Sandbox
+
+A sandbox is the isolated execution environment where a single trial runs. Each trial gets its own clean sandbox — spun up fresh, populated with the library, and torn down after the trial completes. Because sandboxes are isolated and reproducible, agents always interact with the same setup, and there is no cross-contamination between trials. The sandbox captures everything the agent does from the first tool call to the final output.
+
+### Trial
+
+A trial is one run of an experiment — one agent, one treatment, one sandbox, one outcome. You can run multiple trials in parallel within a single experiment launch. Running more trials gives you statistical confidence: if a task succeeds 4 out of 5 times under the Baseline treatment but 5 out of 5 times with + MCP, that signal is meaningful. Each trial produces its own trace, metrics, output, and eval outcome.
+
+### Agent
+
+An agent is the AI coding agent that executes a trial. Oqoqo currently supports **Claude Code** and **Codex**, with Cursor, GitHub Copilot, Antigravity, and OpenCode coming soon. When you select an agent, you also choose the **model** (e.g. Opus, Sonnet) and the **effort level** (e.g. High), which controls how much reasoning budget the agent uses per step. You can run multiple agents in the same experiment to compare their performance on the same task.
+
+### Treatment
+
+A treatment is a variable you're testing — a specific configuration of the agent's context, tooling, or environment. The built-in treatments are:
+
+- **Baseline** — the agent runs with no additional context or tooling; raw capability
+- **+ skill** — the agent receives a skill that describes your interface (an SDK, API, CLI, or MCP server)
+- **+ MCP** — the agent connects through your MCP server directly
+
+You can apply multiple treatments in one experiment and compare results across all of them. Treatments are what turn a single experiment into a controlled comparison.
+
+### Trace
+
+A trace is the complete record of everything an agent did during a trial. It captures every tool call, bash command, file read, API request, output, error, and the reasoning step that preceded each action. Traces are stored for every run and are fully inspectable in the Traces tab. If you need to understand why an agent failed — or why it succeeded where another didn't — the trace is where you start. You can also ask questions grounded in a specific trace using the built-in chat agent.
+
+### Frictions
+
+Frictions are the specific steps in a trace where the agent stalled, retried, or stopped making progress. Oqoqo identifies and surfaces frictions automatically so you don't have to read through hundreds of trace steps to find the problem. A friction might be a failed tool call the agent retried multiple times, a missing piece of context the agent couldn't find, or an error it couldn't recover from. Frictions are the fastest path to understanding what your agent-facing interface needs to improve.
+
+### Metrics
+
+Metrics are the quantitative outputs of a trial: **steps** (how many reasoning and action steps the agent took), **tokens** (total token consumption), **cost** (estimated dollar cost of the run), **duration** (wall-clock time), and **tool calls** (count and breakdown by tool type). Oqoqo surfaces metrics for every trial and aggregates them for comparison across agents, models, and treatments. Lower steps and tokens for the same task outcome is a sign that a treatment or interface change made the agent more efficient.
+
+### Evals outcome
+
+The evals outcome is the pass/fail result for a trial, scored against the rubric you defined. Each rubric criterion is evaluated independently, so you can see exactly which conditions passed and which failed — not just a single binary result. Evals outcomes aggregate across trials to give you a success rate per agent and treatment, which is the primary signal for determining whether a change helped or hurt.
+
+### Reasoning hook
+
+The reasoning hook is a per-step capture of the agent's internal reasoning — its "why" at each decision point throughout the run. Where the trace tells you *what* the agent did, the reasoning hook tells you *why* it did it. This makes it possible to understand not just where an agent failed, but what misunderstanding or missing context led to that failure — which is the insight you need to improve the task, rubric, or agent-facing interface.
+
+---
+
+<CardGroup cols={2}>
+  <Card title="Experiments Overview" icon="flask" href="/experiments/overview">
+    Learn how to structure experiments and what to hold constant vs. vary.
+  </Card>
+  <Card title="Rubrics & Evaluation" icon="circle-check" href="/evaluation/rubrics">
+    Understand how Oqoqo rewrites and applies rubrics to produce reliable eval results.
+  </Card>
+</CardGroup>

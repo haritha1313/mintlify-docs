@@ -1,0 +1,79 @@
+---
+title: "Experiments Overview: Run Agent Workflows at Scale"
+sidebarTitle: "Overview"
+description: "An Oqoqo experiment bundles a task, agents, treatments, and environment into one repeatable unit you can run, compare, and iterate on."
+---
+
+An experiment in Oqoqo is the core unit of work. It combines a natural-language task, evaluation criteria, a library of real repos and data, and a set of agents and treatments into a single configuration you define once and run as many times as you need. Every run produces a full trace, metrics, diffs, and eval outcomes — giving you consistent, comparable results as your product and models evolve.
+
+## The experiment lifecycle
+
+Experiments follow a four-stage loop: **define → run → compare → iterate**. You write a task and rubric, select agents and treatments, and launch. Oqoqo executes every trial in a clean sandbox, captures everything the agent did, scores the results, and surfaces the data you need to decide what to change next. Then you update your interface or workflow and run it again.
+
+<Note>
+  Each experiment is version-tracked, so you can rerun the same setup as your product or models change.
+</Note>
+
+## The experiment model
+
+Every experiment passes through four phases, each with a defined set of inputs and outputs.
+
+### 01 · Input — Everything, held constant
+
+The input layer defines what every trial will receive. Because this stays constant across all runs, differences in output are attributable to what you vary in the sandbox.
+
+| Component | What it contains |
+|---|---|
+| **Task** | A natural-language instruction for the agent |
+| **Evals** | A rubric plus a validator that scores pass/fail |
+| **Library** | Repos and data fixtures (e.g., `acme/checkout-flows`, `data/pricing-fixtures`) |
+| **Environment** | Local or cloud execution target |
+| **Product catalog** | The surfaces and interfaces you're testing |
+
+### 02 · Sandbox — Isolated, reproducible runs
+
+The sandbox is where the agent actually runs. Each trial gets a clean instance so no state leaks between runs.
+
+| Component | What it controls |
+|---|---|
+| **Agents** | Which models run and at what effort level (e.g., Opus · High, Sonnet · High) |
+| **Treatments** | The variable being tested: raw baseline, + skill, + MCP, official skills, official MCP |
+| **Reasoning hook** | Captures the "why" behind each agent decision throughout the run |
+| **Trials** | How many parallel runs execute simultaneously |
+
+### 03 · Output — Everything the run produced
+
+After each trial completes, Oqoqo records a full set of artifacts and metrics automatically.
+
+| Output | Description |
+|---|---|
+| **Traces** | Full trajectory: every tool call, command, file read, and error |
+| **Metrics** | Token count, tool calls, steps taken, wall-clock time, cost |
+| **answer.md** | The agent's final answer or deliverable |
+| **Diff** | Files changed during the run |
+| **Frictions** | The exact steps where the agent struggled or recovered |
+| **Evals outcome** | Pass/fail score against your rubric criteria |
+
+### 04 · Analyze — Find the fix
+
+Once results are in, you can explore them interactively or export them for downstream use.
+
+- **Chat with our agent** — ask questions grounded in the trace to understand why a step failed
+- **Export / API** — pull results into your own tooling or pipeline
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Define an Experiment" icon="flask" href="/experiments/defining-experiments">
+    Write a task, add a rubric, attach your library, and launch your first experiment.
+  </Card>
+  <Card title="Sandboxes" icon="box" href="/experiments/sandboxes">
+    Understand how isolated environments make every run reproducible and comparable.
+  </Card>
+  <Card title="Agents & Models" icon="robot" href="/experiments/agents-and-models">
+    Choose which agents and model variants run your experiments.
+  </Card>
+  <Card title="Treatments" icon="sliders" href="/experiments/treatments">
+    Isolate variables by testing baseline behavior against skills, MCP servers, and more.
+  </Card>
+</CardGroup>

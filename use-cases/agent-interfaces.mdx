@@ -1,0 +1,68 @@
+---
+title: "Test Agent-Facing Interfaces Before Agents Use Them"
+sidebarTitle: "Interface Testing"
+description: "Measure how AI agents interact with your SDK, API, CLI, or MCP server. Identify friction points and fix them before they affect your users."
+---
+
+Your SDK, API, CLI, and MCP server are increasingly the primary interface between your product and the developers who use it — because those developers are using agents. Oqoqo lets you run real agent workflows against your surfaces, capture every friction point, and iterate until your interfaces work the way agents expect them to.
+
+## Why agent-facing interfaces need testing
+
+Agents interact with your surfaces differently from humans. They don't read your docs site — across 112 benchmark trials, neither Claude Code nor Codex performed a single web search or fetched a single documentation page. Instead, agents discover your API through `help()`, `inspect.getsource()`, and runtime probing: they read your docstrings, your source code, and your error messages.
+
+When those surfaces have naming inconsistencies, missing return-type examples, or unhelpful error messages, agents stall. They retry with guesses, reach for deprecated endpoints that still answer with something useful, or default to a more familiar library entirely. The friction doesn't show up as an obvious crash — it shows up as wasted tokens, extra steps, and lower task completion rates.
+
+## What surfaces you can test
+
+Oqoqo works against any surface an agent would call or load:
+
+- **SDKs** — Python, TypeScript, and other language client libraries
+- **REST APIs** — endpoints, response shapes, error formats
+- **CLIs** — command structure, flag naming, output format
+- **MCP servers** — tool names, descriptions, and response shapes
+- **Agent skills** — SKILL.md files and their frontmatter descriptions
+
+If an agent would install it, call it, or load it at runtime, you can test it.
+
+## Common interface problems Oqoqo finds
+
+When you run a Baseline experiment against your surface, Oqoqo reveals friction points that are invisible until an agent hits them:
+
+- **Method names that don't match common patterns** — an agent reaching for `search()` when your method is `run_query()` will hit `AttributeError` and retry. That retry costs tokens and time, and it's entirely avoidable.
+- **Deprecated endpoints returning 404 instead of 410** — a `404` is a blank wall. A `410 Gone` with redirect information tells the agent the right product namespace and where to go next. Agents keep ending up at your old endpoints because your old endpoints are the ones still keeping their promises.
+- **Type mismatches between SDK and REST API** — a collection ID returned as `str` from REST and `uuid.UUID` from the SDK looks identical when printed, but `rest_id == sdk_id` evaluates to `False`. No error, no warning — just silent breakage.
+- **Ambiguous MCP tool names** — when your server exposes `search_files`, `find_file`, `get_file`, and `read_document`, the agent has no way to know that three of them overlap. It picks by surface resemblance, calls the wrong one, and burns a full round trip on every wrong guess.
+- **Missing docstring examples for return types** — an agent that calls the right method and writes code against a response shape it imagined will get `TypeError: not subscriptable`. One real return value example in the docstring collapses a dozen guesses into a single act of recognition.
+- **Error messages that don't suggest the correct path** — an error that only reports what went wrong leaves the agent guessing. An error that names the working call ends the guessing in one step: `'find' was removed in 1.10. Use 'run_query'.`
+
+## How to test an interface
+
+<Steps>
+  <Step title="Write tasks that cover typical agent workflows against your surface">
+    Write 5–10 tasks that represent the things agents actually do with your library: create a resource, run a query, modify existing code that uses your SDK, handle an error response. Cover both the happy path and known edge cases.
+  </Step>
+  <Step title="Run with Baseline treatment">
+    Run the experiment with **Baseline** treatment: the agent gets the task and your library, with no skill file, no MCP server, and no extra context. This mirrors how most agents will encounter your surface in the wild.
+  </Step>
+  <Step title="Review frictions">
+    Open the trace for any failed or slow trial. Look for the steps where the agent called the wrong method, hit an unexpected error, retried more than once, or stalled. Each of those moments is a gap between what your surface promised and what it delivered.
+  </Step>
+  <Step title="Fix the surface">
+    Fix the specific interface problems the frictions reveal: improve docstrings, add return-type examples, update error messages to name the correct call, fix the 404 to return 410 with redirect info, rename an ambiguous method.
+  </Step>
+  <Step title="Rerun and compare">
+    Rerun the experiment against the updated surface and compare pass rate, token usage, and friction count. The Compare view shows you whether the change helped.
+  </Step>
+</Steps>
+
+## Testing skills and MCP servers
+
+Once you've improved the raw surface, add your skill or MCP server as a treatment and measure its effect. Add **+ skill** as a treatment alongside Baseline and compare pass rate and token usage across treatments.
+
+If the skill doesn't improve outcomes, the problem is usually in the SKILL.md frontmatter description — the description is the only thing the agent reads at startup to decide whether to load the skill. A description like _"provides client SDKs across multiple languages"_ won't match the language a developer uses when they're stuck on a hybrid retrieval setup. Write the description as a classifier: name the specific tasks and problems the skill helps with, not the skill's features.
+
+If the skill does load but still doesn't improve pass rate, read the skill body: is it routing to docs rather than providing opinionated guidance? Is it encoding the failure modes and edge cases agents actually hit, or is it a documentation dump?
+
+<Note>
+  Agents never read your docs site. They discover your API through installed package introspection and error messages. Make those surfaces count.
+</Note>

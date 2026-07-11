@@ -1,0 +1,73 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Oqoqo",
+  "theme": "luma",
+  "favicon": "https://media.brand.dev/f199d130-d652-4c0d-aefb-ee96b64b95dd.png",
+  "colors": {
+    "primary": "#7c7c7c",
+    "light": "#050505",
+    "dark": "#c1c1c1"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "core-concepts"
+            ]
+          },
+          {
+            "group": "Experiments",
+            "pages": [
+              "experiments/overview",
+              "experiments/defining-experiments",
+              "experiments/sandboxes",
+              "experiments/agents-and-models",
+              "experiments/treatments"
+            ]
+          },
+          {
+            "group": "Evaluation",
+            "pages": [
+              "evaluation/rubrics",
+              "evaluation/traces",
+              "evaluation/metrics",
+              "evaluation/frictions"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "use-cases/agent-evals",
+              "use-cases/agent-interfaces",
+              "use-cases/ci-cd",
+              "use-cases/drift-detection",
+              "use-cases/benchmarking",
+              "use-cases/model-spend"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/faq",
+              "reference/supported-agents",
+              "reference/supported-surfaces"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Join Waitlist",
+      "href": "https://www.oqoqo.ai/waitlist/"
+    }
+  }
+}

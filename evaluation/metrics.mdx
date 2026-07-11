@@ -1,0 +1,75 @@
+---
+title: "Metrics: Compare Agent Performance Across Trials and Runs"
+sidebarTitle: "Metrics"
+description: "Oqoqo captures steps, tokens, cost, duration, and tool call breakdowns for every trial. Compare metrics across agents, treatments, and versions."
+---
+
+Oqoqo records quantitative performance data for every trial automatically. These metrics let you go beyond pass/fail and understand *how* agents are completing tasks — how many steps they needed, how much it cost, how long it took, and which tools they leaned on most. When you compare across treatments, agents, or versions, metrics are what tell you whether a change is actually an improvement.
+
+## What metrics are captured
+
+| Metric | Description | Example |
+|--------|-------------|---------|
+| Steps | Total number of agent steps in the trial | 218 |
+| Tokens | Total tokens consumed across the run | 8.4M |
+| Cost | Estimated cost based on model pricing | $5.25 |
+| Duration | Wall-clock time from start to finish | 4m 32s |
+| Tool calls | Total number of tool invocations | 23 |
+| Tool call breakdown | Percentage of calls by tool type | bash 30.8%, browser.click 30.8%, fs.read 23.1%, search 15.3% |
+
+All metrics are captured per trial, so you can compare across parallel runs within an experiment as well as across separate experiments.
+
+<Note>
+  Metrics are captured for every trial, so you can compare across parallel runs as well as across experiments.
+</Note>
+
+## Comparing metrics
+
+The **Compare** view shows metrics side by side across treatments, agents, or versions. Use it to answer questions like:
+
+- Which treatment uses fewer tokens to achieve the same pass rate?
+- Does a newer model version cost more or less than the baseline?
+- Which agent finishes the task fastest?
+- Does adding a skill reduce step count or increase it?
+
+Sorting and filtering in the Compare view lets you isolate the dimensions that matter for your specific experiment.
+
+<Info>
+  The Compare view works across any combination of agents, treatments, and trials in your experiment. You're not limited to pairwise comparisons.
+</Info>
+
+## What to look for
+
+Metrics become most useful when you read them alongside rubric results. Patterns to watch for:
+
+<AccordionGroup>
+  <Accordion title="High step count with low eval pass rate">
+    The agent is likely stuck in a loop — retrying the same action or exploring paths that don't lead to a solution. Look at the trace to find where the loop starts, then check whether a friction point (a failed tool call, a confusing error) is causing the repetition.
+  </Accordion>
+  <Accordion title="High token count vs. baseline">
+    The treatment is adding overhead without adding value. Compare the tool call breakdown to see if the agent is doing more search or context-loading than necessary. A high search percentage often indicates the agent is struggling to locate the right API surface.
+  </Accordion>
+  <Accordion title="High fraction of search tool calls">
+    The agent is spending a disproportionate amount of time trying to find the right method, endpoint, or schema. This is a signal that your agent-facing interface lacks discoverability — naming, examples, or introspection surfaces need attention.
+  </Accordion>
+  <Accordion title="Low cost + high pass rate">
+    A cheaper model is performing as well as an expensive one. This is the signal to swap the model on that workflow and redirect spend elsewhere.
+  </Accordion>
+</AccordionGroup>
+
+## Diffs
+
+Alongside the quantitative metrics, Oqoqo captures the exact files changed by the agent during the trial as a diff. This gives you a ground-truth record of what the agent actually modified — useful for verifying correctness beyond what the rubric checks.
+
+```diff
+auth.ts
++ cache.set(key, mod)
+- return require(path)
++ return require(resolve(path))
+```
+
+Diffs appear in the trial output alongside `answer.md`. You can review them directly in the UI or access them via the API.
+
+<Tip>
+  When a trial passes the rubric but the diff looks wrong, read the reasoning hook entries in the trace. The agent may have solved the stated task in an unexpected way — the diff shows you exactly what changed and where.
+</Tip>

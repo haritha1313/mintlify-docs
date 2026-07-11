@@ -1,0 +1,77 @@
+---
+title: "Oqoqo Quickstart: Define and Launch Your First Experiment"
+sidebarTitle: "Quickstart"
+description: "Set up your first agent experiment on Oqoqo: join the waitlist, define a workflow, configure agents and treatments, and launch your first trial."
+---
+
+Oqoqo turns an agent workflow into a repeatable, measurable experiment. This guide walks you through every step — from requesting access to reviewing your first results. The whole process takes a few minutes if you use a template, or slightly longer if you're defining a custom task from scratch.
+
+<Tip>
+  Start with a template task from the Oqoqo library to skip setup and run your first experiment in under 5 minutes.
+</Tip>
+
+<Steps>
+  <Step title="Join the waitlist">
+    Go to [oqoqo.ai/waitlist](https://www.oqoqo.ai/waitlist/) and request access. You receive up to **100 free runs** — enough to explore the platform thoroughly before committing to a plan.
+  </Step>
+
+  <Step title="Open the Lab">
+    Once you have access, log in to the Oqoqo dashboard and navigate to **Lab › Define Experiment**. This is where you configure every aspect of an experiment before launching it.
+  </Step>
+
+  <Step title="Define your task">
+    Write a natural-language instruction that tells the agent what to accomplish. Be specific about the goal, the expected output format, and any constraints.
+
+    **Example task:**
+    ```text
+    Open five product pages in parallel browser tabs, extract the price from
+    each, and return them as a JSON array in page order.
+    ```
+
+    Optionally, click **+ Add rubric** to define evaluation criteria — for example, "Returns the correct shape," "Preserves page order," and "Reports cache state." Oqoqo automatically rewrites your rubric to follow best practices before it's applied.
+  </Step>
+
+  <Step title="Select agents and treatments">
+    Choose which agents run your experiment and at what settings. You can combine multiple agents and effort levels in a single experiment — for example:
+
+    - **Claude Code Opus · High**
+    - **Claude Code Sonnet · High**
+
+    Then choose the treatments you want to compare:
+
+    - **Baseline** — the agent runs with no additional context or tooling
+    - **+ skill** — the agent receives a skill that describes your interface
+    - **+ MCP** — the agent connects via your MCP server
+
+    Oqoqo runs each agent–treatment combination as a separate track within the experiment, so you can compare results side by side.
+  </Step>
+
+  <Step title="Configure your library and environment">
+    Attach the repos and data fixtures the agent needs under **Library**. These are checked out into each sandbox before the agent starts, ensuring every trial starts from an identical state.
+
+    Under **Environment**, choose where sandboxes run:
+
+    - **Local** — runs on your own infrastructure
+    - **Cloud** — Oqoqo provisions and manages the environment for you
+  </Step>
+
+  <Step title="Set trial count and launch">
+    Set the number of parallel trials (1–N) you want to run. More trials give you statistical confidence in your results; fewer trials are faster and cheaper for early exploration.
+
+    Click **Launch**. Oqoqo spins up a clean, isolated sandbox for each trial and starts running immediately.
+  </Step>
+
+  <Step title="Review results">
+    When trials complete, open the experiment to review:
+
+    - **Traces tab** — the full step-by-step trajectory for each run: tool calls, commands, token counts, errors, and friction points
+    - **Output tab** — the final answer or artifact produced by each trial, plus a diff of any files changed
+    - **Evals tab** — pass/fail outcomes scored against your rubric, with per-criterion breakdowns
+
+    Compare metrics across runs — steps, tokens, cost, duration, tool calls — to understand which agent, model, or treatment performed best on your task.
+  </Step>
+</Steps>
+
+<Note>
+  Unfamiliar with terms like trials, treatments, rubrics, or traces? See [Core Concepts](/core-concepts) for a complete glossary of Oqoqo building blocks.
+</Note>

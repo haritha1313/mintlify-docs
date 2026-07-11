@@ -1,0 +1,65 @@
+---
+title: "Agents and Models: Configure Who Runs Your Experiments"
+sidebarTitle: "Agents & Models"
+description: "Choose which AI coding agents and model variants run your Oqoqo experiments. Compare Claude Code, Codex, and more across effort levels."
+---
+
+Every Oqoqo experiment runs through one or more AI coding agents. You choose which agents execute your task and at what model and effort level — then Oqoqo runs them in parallel so you can compare results directly. This makes it straightforward to see whether a workflow succeeds consistently, which agents handle your product's interfaces best, and where different models diverge.
+
+## Supported agents
+
+Oqoqo currently supports two agents, with more on the way:
+
+- **Claude Code** — Anthropic's CLI coding agent. Interacts with your codebase through terminal commands, file reads and edits, and tool calls.
+- **Codex** — OpenAI's coding agent. Runs the same task with OpenAI's model family.
+
+Both agents receive the same task, library, and environment configuration. The only difference between them is their underlying model and how they approach the problem — which is exactly what you're measuring.
+
+## Model variants and effort levels
+
+Each agent supports multiple model and effort configurations. You select the combination you want when you define the experiment.
+
+| Agent | Model / Effort options |
+|---|---|
+| **Claude Code** | Opus · High, Sonnet · High (and other effort levels) |
+| **Codex** | OpenAI model variants and effort levels |
+
+Effort level controls how much compute the agent is allowed to use per step. Higher effort typically produces more thorough reasoning but increases token usage and cost. Running the same workflow at different effort levels lets you find the point where quality stops improving.
+
+## Running multiple agents
+
+You can select two or more agents — or two or more model/effort combinations — in a single experiment. Oqoqo runs them all in parallel and presents results side by side.
+
+For example, running `Opus · High` alongside `Sonnet · High` on the same workflow gives you a direct comparison of:
+
+- Whether both pass the rubric
+- How many steps and tokens each one uses
+- Where each agent struggled (frictions)
+- What diffs each one produced
+
+<Tip>
+  Run the same workflow with both Claude Code and Codex to reveal which agent handles your product's API most effectively.
+</Tip>
+
+This is how you build evidence for model selection decisions — not by reading benchmarks, but by running your actual workflows.
+
+## How agents discover your product
+
+Agents don't read your documentation the way a developer would. In practice, they rely heavily on:
+
+- **`help()`** — calling built-in help on modules, functions, and objects
+- **`inspect.getsource()`** — reading function and class source directly
+- **Runtime probing** — importing modules and experimenting with live behavior
+
+This means the quality of your agent-facing surfaces — how your SDK exposes itself, how your CLI responds to `--help`, how your MCP server describes its tools — directly affects how well agents can use your product. Testing those surfaces with Oqoqo is how you find the gaps. See [Testing Agent Interfaces](/use-cases/agent-interfaces) for more on this use case.
+
+## Agent support status
+
+| Agent | Provider | Status |
+|---|---|---|
+| Claude Code | Anthropic | Available |
+| Codex | OpenAI | Available |
+| Cursor | Cursor | Coming soon |
+| GitHub Copilot | GitHub | Coming soon |
+| Antigravity | — | Coming soon |
+| OpenCode | — | Coming soon |

@@ -1,0 +1,78 @@
+---
+title: "Block PRs That Break Agent Workflows with CI/CD Gating"
+sidebarTitle: "CI/CD Gating"
+description: "Block pull requests that break agent workflows. Integrate Oqoqo into your CI pipeline to catch regressions before they reach production."
+---
+
+Every pull request that changes a method name, restructures an API response, or rewrites an error message is a potential regression for every agent workflow that depends on it. Oqoqo integrates into your CI pipeline to run your agent experiment suite on every pull request — and block the ones that break things before they ship.
+
+## Why CI/CD for agent workflows
+
+Unit tests don't catch agent regressions. Your test suite can go green while an agent workflow goes completely off the rails. A PR that renames an exported method, changes the text of an error message, or restructures a JSON response shape can break every agent that relies on those surfaces — and no unit test will catch it, because unit tests don't run the agent.
+
+As agents become primary users of developer infrastructure, regressions in your agent-facing surfaces are regressions in your product. The same discipline you apply to human-facing APIs — don't ship breaking changes without catching them in CI — applies to agent-facing interfaces too.
+
+## How it works
+
+Configure Oqoqo to run your experiment suite on every pull request. When a PR is opened, Oqoqo spins up clean sandboxes, runs each experiment, and reports pass rate against your defined threshold. If any experiment falls below the threshold, the check fails and the PR is blocked. If everything passes, the check turns green and the PR can merge.
+
+Each check links directly to the trace for any failing trial, so the PR author can see exactly what broke and why — not just that a check failed.
+
+## Setting up CI/CD gating
+
+<Steps>
+  <Step title="Define the experiments to run in CI">
+    Pick your most critical agent workflows — the ones that would cause real user impact if they broke. You don't need to run your entire experiment suite in CI on every PR. Start with 3–5 experiments that cover your most important surfaces.
+  </Step>
+  <Step title="Set a pass rate threshold">
+    Define the minimum pass rate required for each experiment. For example: 80% of trials must pass for the check to succeed. Choose a threshold that reflects your tolerance for flakiness versus your need to catch regressions.
+  </Step>
+  <Step title="Configure the trigger">
+    Set Oqoqo to run on every pull request by configuring the trigger:
+
+    ```yaml
+    on: pull_request
+    ```
+
+    You can also configure it to run only on PRs targeting specific branches, or only when certain paths change.
+  </Step>
+  <Step title="Add the Oqoqo check to your branch protection rules">
+    In your repository settings, add the Oqoqo experiment check as a required status check for your protected branch. PRs can't merge until the check passes.
+  </Step>
+  <Step title="Open a PR and watch it run">
+    When a PR is opened, Oqoqo automatically runs the configured experiment suite. Trials execute in parallel across isolated sandboxes. Results appear as a status check on the PR within minutes.
+  </Step>
+  <Step title="Review failures with trace links">
+    If the check fails, the PR shows which experiments fell below threshold, along with direct links to the trace for each failing trial. The PR author can see the exact step where the agent broke — not just that it broke.
+  </Step>
+</Steps>
+
+## Scheduled runs
+
+CI gating catches regressions introduced by your code changes. But your agent workflows can also regress without any code change — model updates, dependency upgrades, and subtle product shifts can all silently break things.
+
+Configure a scheduled run alongside your PR gating to catch this class of failure:
+
+```yaml
+schedule: nightly
+```
+
+A nightly run reruns the same experiments on the same surface and flags any change in pass rate, token usage, or friction count. See [drift detection](/use-cases/drift-detection) for how to interpret and act on scheduled run results.
+
+## What gets blocked
+
+With Oqoqo gating in place, PRs that do any of the following will fail the check before they merge:
+
+- Rename exported methods that agents rely on
+- Change error message text that agents use to decide their next action
+- Restructure API response shapes (field names, types, nesting)
+- Remove or alter skills or MCP tool definitions that agents depend on
+- Change default behaviors that agent workflows assume
+
+<Info>
+  CI/CD gating catches regressions before they ship, so your users' agent workflows keep working across every release.
+</Info>
+
+<Tip>
+  Start with your 3–5 most critical agent workflows. You don't need to cover everything on day one — a small, well-chosen experiment suite in CI is more valuable than a comprehensive suite that's too slow or flaky to trust.
+</Tip>

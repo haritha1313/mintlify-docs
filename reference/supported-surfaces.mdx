@@ -1,0 +1,115 @@
+---
+title: "Agent-Testable Surfaces: SDKs, APIs, CLIs, and More"
+sidebarTitle: "Surfaces"
+description: "Oqoqo can test any surface an AI agent interacts with: SDKs, REST APIs, CLIs, MCP servers, and agent skills. Learn what each surface tests."
+---
+
+When an agent works with your product, it doesn't browse your website or read your documentation. It installs packages, runs commands, probes endpoints, and reads source code. Oqoqo tests the surfaces where that interaction actually happens — so you can find and fix the frictions that affect real agent performance.
+
+<Note>
+  Agents don't browse your docs site. The surfaces listed here are where agent-product interaction actually happens. Optimizing your documentation website for AI agents solves the wrong problem; optimizing these surfaces solves the right one.
+</Note>
+
+<Tip>
+  Test with the Baseline treatment first — no skill, no MCP server, just the agent and your product. Frictions that appear in Baseline runs reveal which surfaces need improvement before you add any enhancements.
+</Tip>
+
+---
+
+### SDKs
+
+**From an agent's perspective**, an SDK is a client library it installs and imports. The agent has no awareness of your docs site — it discovers your API entirely through the installed package.
+
+**How agents interact with SDKs:**
+Agents call `help()` on classes and methods to read function signatures and docstrings. They call `inspect.getsource()` on implementations to read the actual source code. They write code against the installed API, run it, observe errors, and adapt. Claude Code relies heavily on `help()` — it reads docstrings the way a developer reads a tooltip. Codex relies heavily on `inspect.getsource()` — it reads your implementation to understand how the library actually behaves.
+
+**What to look for when testing:**
+- Do method names follow common patterns agents would guess? (`create`, `insert`, `upsert` vs. bespoke names)
+- Do docstrings include real return value examples, not just type signatures?
+- Do error messages suggest the correct alternative when a method is called incorrectly?
+- Is behavior consistent between your REST API and your SDK wrapper?
+
+**Common friction patterns:**
+- **Method not found** — the agent guesses a plausible name (`client.search()`) that doesn't exist; the installed SDK uses a different convention (`client.query.run()`)
+- **Type mismatch** — the SDK accepts a UUID object, the agent passes a string; the error message doesn't explain the expected type
+- **Missing docstring examples** — `help(table.search)` returns a signature with no example; the agent writes a best-guess call that fails on required keyword arguments
+
+---
+
+### REST APIs
+
+**From an agent's perspective**, a REST API is a set of HTTP endpoints it calls directly, usually by probing common path patterns or reading an OpenAPI spec if one is available in the workspace.
+
+**How agents interact with REST APIs:**
+Agents probe with `GET /health`, `GET /api/v1/`, and other common path patterns to discover what's available. If an OpenAPI spec exists in the workspace or at a well-known path, agents read it. They read response bodies and error messages to infer schema requirements. They rarely guess at undocumented endpoints — what's discoverable is what gets used.
+
+**What to look for when testing:**
+- Do deprecated endpoints return `410 Gone` with a redirect hint, or `404 Not Found` with no guidance?
+- Are error responses actionable? Does a schema validation error name the failing field and expected type?
+- Is the OpenAPI spec current, complete, and reachable from the workspace?
+- Are authentication errors distinguishable from permission errors?
+
+**Common friction patterns:**
+- **Deprecated path with no guidance** — agent hits an old endpoint, gets a `404`, and has no signal to try the new path; the task stalls or fails
+- **Schema error with no field-level feedback** — agent sends a well-formed request with one wrong field; the response says `invalid request` with no specifics; agent guesses at the fix
+- **Missing OpenAPI spec** — agent can't enumerate available endpoints; it probes manually and misses operations that aren't at obvious paths
+
+---
+
+### CLIs
+
+**From an agent's perspective**, a CLI is a command-line tool it invokes via bash. It discovers capabilities by running `--help` and exploring subcommands, then parses stdout and stderr to determine what happened.
+
+**How agents interact with CLIs:**
+Agents run `--help` on the top-level command and on subcommands they discover. They run commands and observe exit codes, stdout, and stderr. If a command fails with a non-zero exit code and no stderr output, the agent has no signal to act on. If help text references flags or subcommands that don't exist in the installed version, the agent spends cycles chasing dead ends.
+
+**What to look for when testing:**
+- Does `--help` output match the installed version exactly?
+- Do error messages name what went wrong and suggest the correct command?
+- Are the most common subcommands reachable from the top-level help text?
+- Are exit codes consistent? Does a failed operation always exit non-zero?
+
+**Common friction patterns:**
+- **Help text version mismatch** — the installed CLI is v2.3; the help text describes v2.1 flags; the agent tries a flag that no longer exists and gets a cryptic error
+- **Silent failure** — the command exits with code `1` and no stderr output; the agent has no information to diagnose or retry
+- **Undiscoverable subcommands** — a critical operation is nested three levels deep with no pointer from the top-level help; the agent never finds it
+
+---
+
+### MCP Servers
+
+**From an agent's perspective**, an MCP server is a flat list of named tools with descriptions. The agent reads that list at startup and selects tools by matching the current task against tool names and descriptions — there is no hierarchy, no search, and no docs page to consult.
+
+**How agents interact with MCP servers:**
+At connection time, the MCP server exposes every available tool as a name + description pair. The agent scans that list and selects the tool whose name and description best matches the task it's trying to accomplish. If two tools have similar names or overlapping descriptions, the agent may pick the wrong one. If a description uses internal product terminology instead of the language developers use to phrase tasks, the right tool may never be selected.
+
+**What to look for when testing:**
+- Are tool names distinct enough that the agent picks the right one on the first try?
+- Do descriptions match how a developer would phrase the task — not how your product team describes the feature?
+- Is there unintended overlap between tools that do similar things?
+- Does the agent call each tool successfully on the first attempt, or does it retry with a different tool?
+
+**Common friction patterns:**
+- **Overlapping tool names** — `search_files`, `find_file`, and `get_file` all sound plausible for "get the contents of a file"; the agent picks one and fails before trying another
+- **Product-team language in descriptions** — the description says "leverages the document ingestion pipeline"; the agent is trying to "upload a file" and doesn't recognize the match
+- **Tools that do the same thing under different names** — the agent learns the right tool by trial and error, spending tokens on failed calls that could be avoided with clearer naming
+
+---
+
+### Agent Skills
+
+**From an agent's perspective**, a skill is a `SKILL.md` file with frontmatter (a short description of when to invoke the skill) and a body (instructions for what to do). At startup, the agent reads approximately 100 tokens of metadata per skill and decides which ones are relevant to the current task. Only then does it load the full content.
+
+**How agents interact with skills:**
+The agent reads the skill's frontmatter description — typically one or two sentences — and compares it against the current task. If the description matches, the agent loads the full skill body and uses it to guide its approach. If the description doesn't match the way a developer would phrase the task, the skill never gets loaded, no matter how useful the body content is.
+
+**What to look for when testing:**
+- Does the skill description match the language developers actually use when phrasing the tasks the skill is meant to help with?
+- Does the skill get loaded at all? (Check the trace for skill load events.)
+- When the skill is loaded, does it improve pass rate, reduce token usage, or reduce errors — compared to a Baseline run without the skill?
+- Does loading the skill add token overhead without improving outcomes?
+
+**Common friction patterns:**
+- **Description uses product terminology** — the description says "provides access to client SDK configuration primitives"; the developer task says "connect to the database"; the agent doesn't recognize the skill as relevant and never loads it
+- **Skill never loaded** — the body content is accurate and helpful, but the frontmatter description doesn't trigger a match; the agent completes the task without the skill's guidance
+- **Skill adds overhead without improving outcomes** — the skill is loaded and followed, but the instructions are too general to prevent the frictions that appear in Baseline runs; loading it costs tokens without improving the score

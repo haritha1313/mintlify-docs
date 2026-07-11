@@ -1,0 +1,102 @@
+---
+title: "Rubrics: Define Evaluation Criteria for Experiments"
+sidebarTitle: "Rubrics"
+description: "Define pass/fail criteria for your Oqoqo experiments. Oqoqo rewrites your rubric to eval best practices and scores every trial automatically."
+---
+
+A rubric is how you tell Oqoqo what a successful trial looks like. You write your criteria in plain language, and Oqoqo handles the rest — rewriting them to follow evaluation best practices and scoring every trial automatically. The result is consistent, comparable pass/fail data across every run in your experiment.
+
+## What a rubric is
+
+A rubric is a set of criteria that determine whether a trial passed or failed. Each criterion is a testable assertion about the agent's output or behavior. Oqoqo evaluates every criterion independently per trial, so you can see exactly which aspects of the task succeeded and which didn't.
+
+You write the rubric in plain language. You don't need to know how LLM-based evaluation works under the hood — Oqoqo rewrites your criteria to follow best practices before scoring begins.
+
+<Note>
+  Your rubric is held constant across all trials in an experiment, so results are directly comparable.
+</Note>
+
+## Writing a rubric
+
+Write each criterion as a testable assertion — something that is unambiguously either true or false given the agent's output. Vague or compound criteria tend to produce noisy results.
+
+**Tips:**
+
+- One assertion per criterion. Don't combine two checks into one sentence.
+- Focus on observable outputs. What did the agent return, write, or do?
+- Avoid subjective language like "good" or "appropriate" — phrase it so a reviewer could verify it mechanically.
+
+**Example criteria:**
+
+<CardGroup cols={2}>
+  <Card title="Returns requested shape" icon="check" href="#writing-a-rubric">
+    The output matches the expected data structure (e.g., a JSON array).
+  </Card>
+  <Card title="Preserves order" icon="check" href="#writing-a-rubric">
+    Items in the output appear in the same order as the input.
+  </Card>
+  <Card title="Reports cache state" icon="check" href="#writing-a-rubric">
+    The agent's answer includes the current cache status.
+  </Card>
+  <Card title="No unhandled exceptions" icon="check" href="#writing-a-rubric">
+    The agent completed the task without throwing an unhandled error.
+  </Card>
+  <Card title="Completes within cost budget" icon="check" href="#writing-a-rubric">
+    Total token cost for the trial is below the defined threshold.
+  </Card>
+</CardGroup>
+
+## Auto-rewrite
+
+When you submit a rubric, Oqoqo rewrites it to follow industry best practices for LLM-based evaluation. This means your criteria are reformulated to reduce ambiguity, improve scoring consistency, and minimize false positives.
+
+You don't need to be an eval expert to get high-quality results. Write what you want the agent to do — Oqoqo handles the translation into a robust eval prompt.
+
+<Info>
+  You can review the rewritten rubric before running your experiment. If a criterion produces unexpected results, adjusting the original wording and re-running is often enough to fix it.
+</Info>
+
+## Validators
+
+Alongside rubrics, you can add **validators** — programmatic checks for deterministic assertions. Use validators when the check is mechanical and doesn't need LLM judgment.
+
+Good candidates for validators include:
+
+- **Schema shape** — confirm the output matches a JSON schema
+- **Output format** — check that a file was written in the right format
+- **Exact value match** — assert a specific field equals a known value
+- **Presence of required fields** — verify all required keys exist in the response
+
+Rubrics and validators work together. Rubrics handle the qualitative and behavioral checks; validators handle the structural and deterministic ones.
+
+## Viewing results
+
+Rubric results appear in the **Evals** tab for each trial. Each criterion shows:
+
+- ✓ **Pass** — with supporting context from the trial output
+- ✕ **Fail** — with the reason the criterion was not met
+
+You can review results at the trial level or compare across all trials in the experiment to see which criteria are consistently failing and which are stable.
+
+## Iterating on rubrics
+
+If a criterion catches too many false positives or misses real failures, update it and rerun. Oqoqo re-evaluates all trials against the updated rubric, so you don't have to re-execute the experiment.
+
+<Steps>
+  <Step title="Identify the noisy criterion">
+    Look at trials where the result seems wrong — pass when it should fail, or fail when it should pass.
+  </Step>
+  <Step title="Update the criterion">
+    Rewrite the assertion to be more precise. Add context, tighten scope, or split a compound criterion into two.
+  </Step>
+  <Step title="Rerun evaluation">
+    Oqoqo re-scores all existing trials against the updated rubric.
+  </Step>
+  <Step title="Review the new results">
+    Compare before and after to confirm the update resolved the noise without introducing new issues.
+  </Step>
+</Steps>
+
+<Tip>
+  If you're unsure why a criterion failed on a specific trial, open the trace for that trial and read the agent's steps alongside the failure reason. The context usually makes the scoring decision clear.
+</Tip>
